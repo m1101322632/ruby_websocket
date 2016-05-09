@@ -1,7 +1,9 @@
 ruby链接redis需要两个扩展库,一个是 redisgems, 一个是redis,安装命令如下:
 
 $ sudo apt-get install gem
+$ gem sources -a http://ruby.taobao.org/  
 $ gem sources -a https://ruby.taobao.org/
 $ gem sources -l
+$ sudo gem install rails
 $ sudo gem install redis
 
