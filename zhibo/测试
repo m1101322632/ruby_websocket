@@ -1,0 +1,45 @@
+{"type":"connect","client_name":"游客a","room_id":"1001","mid":"1","adminid":"14","tuijianmid":"12151","tuijianusername":"助理张端童","tuijianadminid":"3","login_count":"","LOGIN_SWITCH":"0","session_id":"1"}
+{"type":"connect","client_name":"会员b","room_id":"1001","mid":"2","adminid":"12","tuijianmid":"12151","tuijianusername":"助理张端童","tuijianadminid":"3","login_count":"","LOGIN_SWITCH":"0","session_id":"2"}
+
+{"type":"connect","client_name":"管理员c","room_id":"1001","mid":"3","adminid":"1","tuijianmid":"12151","tuijianusername":"助理张端童","tuijianadminid":"3","login_count":"","LOGIN_SWITCH":"0","session_id":"3"}
+
+{"type":"connect","client_name":"管理员d","room_id":"1001","mid":"4","adminid":"1","tuijianmid":"12151","tuijianusername":"助理张端童","tuijianadminid":"3","login_count":"","LOGIN_SWITCH":"0","session_id":"4"}
+
+{"type":"say","mid":"1","room_id":"1001","tomid":"2","content":"zhazha","shstatus":1}
+
+redis.lpush('wb_message', '{"type":"login","client_name":"游客a","room_id":"1001","mid":"1","adminid":"14","tuijianmid":"12151","tuijianusername":"助理张端童","tuijianadminid":"3","login_count":"","LOGIN_SWITCH":"0","session_id":"1"}')
+redis.lpush('wb_message', '{"type":"login","client_name":"会员b","room_id":"1001","mid":"2","adminid":"12","tuijianmid":"12151","tuijianusername":"助理张端童","tuijianadminid":"3","login_count":"","LOGIN_SWITCH":"0","session_id":"2"}')
+redis.lpush('wb_message', '{"type":"login","client_name":"管理员c","room_id":"1001","mid":"3","adminid":"1","tuijianmid":"12151","tuijianusername":"助理张端童","tuijianadminid":"3","login_count":"","LOGIN_SWITCH":"0","session_id":"3"}')
+redis.lpush('wb_message', '{"type":"login","client_name":"管理员d","room_id":"1001","mid":"4","adminid":"1","tuijianmid":"12151","tuijianusername":"助理张端童","tuijianadminid":"3","login_count":"","LOGIN_SWITCH":"0","session_id":"4"}')
+
+redis.lpush('wb_message', '{"type":"logout","client_name":"游客a","room_id":"1001","mid":"1","adminid":"14","LOGIN_SWITCH":"0","session_id":"1"}')
+
+
+
+{"type":"connect_close","client_name":"游客1","room_id":"1001","mid":"1","adminid":"14","tuijianmid":"12151","tuijianusername":"助理张端童","tuijianadminid":"3","login_count":"","LOGIN_SWITCH":"0","session_id":"1"}
+
+
+程序逻辑验证:
+1.假设现在有5个用户
+  游客a, 会员b, 管理员c, 管理员d
+2.验证登陆/退出
+  a 登陆(b/c/d已经登陆):   
+      #a b c d 都收到a的登陆消息 测试通过
+      #a收到的登陆消息中的client_list包含 b c d  测试通过   
+  a 退出:    eg:{"type":"logout","client_name":"游客a","room_id":"1001","mid":"1","adminid":"14","LOGIN_SWITCH":"0","session_id":"1"}
+      #a b c d都收到a的退出消息  测试通过
+
+2.说话验证:
+  a say-to-all 且 shstatus = 1,shmid= c   eg:{"type":"say","mid":"1","room_id":"1001","tomid":"all","content":"zhazha","shstatus":1, "shmid":"3"}
+      #b d 收到消息,a c收不到消息   测试通过
+  a say-to-all 且 shstatus = 0   eg:{"type":"say","mid":"1","room_id":"1001","tomid":"all","content":"zhazha","shstatus":0}
+      #c d 收到消息,a b收不到消息  测试通过
+  a say-to-b 且shstatsu=0 eg:{"type":"say","mid":"1","room_id":"1001","tomid":"2","content":"zhazha","shstatus":0}
+      #c d 收到消息,a b收不到消息  测试通过
+  a say-to-b 且shstatsu=1,shmid=d  eg:{"type":"say","mid":"1","room_id":"1001","tomid":"2","content":"zhazha","shstatus":1, "shmid":"4"}
+      #b c 收到消息, a/d收不到消息 测试通过
+3.删除消息  eg:{"type":"deleteliaotian","mid":"3","lid":"4"}
+  c删除消息,a/b/d都收到消息  测试通过
+4.清屏  eg:{"type":"pubclear","mid":"3"}
+  c清屏, a b 收到清屏消息,d收不到清屏消息  测试通过
+
