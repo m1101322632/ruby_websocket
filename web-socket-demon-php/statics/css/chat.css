@@ -1,0 +1,9 @@
+@CHARSET "UTF-8";
+
+#chat-content-div {
+	border: solid 1px grey;
+	width: 200px;
+	height: 100px;
+	overflow: auto;
+	margin-bottom: 20px;
+}
